@@ -109,4 +109,25 @@ public interface IRoute53DomainsUtil
     /// A <see cref="GetOperationDetailResponse"/> including status, submission date, and message.
     /// </returns>
     ValueTask<GetOperationDetailResponse> GetOperationDetail(string operationId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a DS record to a domain.
+    /// </summary>
+    /// <param name="domainName">The domain to add the DS record to.</param>
+    /// <param name="dsRecord">The DS record string from Cloudflare.</param>
+    /// <param name="wait">
+    /// If true, polls AWS until the operation completes or fails.
+    /// </param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    ValueTask AddDsRecord(string domainName, string dsRecord, bool wait = false, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a DS record from a domain.
+    /// </summary>
+    /// <param name="domainName">The domain to remove the DS record from.</param>
+    /// <param name="wait">
+    /// If true, polls AWS until the operation completes or fails.
+    /// </param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    ValueTask RemoveDsRecord(string domainName, bool wait = false, CancellationToken cancellationToken = default);
 }

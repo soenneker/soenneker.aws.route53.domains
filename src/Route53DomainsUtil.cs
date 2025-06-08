@@ -299,6 +299,66 @@ public sealed class Route53DomainsUtil : IRoute53DomainsUtil
         }
     }
 
+    public async ValueTask AddDsRecord(string domainName, string dsRecord, bool wait = false, CancellationToken cancellationToken = default)
+    {
+        if (domainName.IsNullOrWhiteSpace())
+            throw new ArgumentException("Domain name must be provided.", nameof(domainName));
+        if (dsRecord.IsNullOrWhiteSpace())
+            throw new ArgumentException("DS record must be provided.", nameof(dsRecord));
+
+        var request = new AssociateDelegationSignerToDomainRequest
+        {
+            DomainName = domainName,
+            SigningAttributes = new DnssecSigningAttributes
+            {
+                PublicKey = dsRecord
+            }
+        };
+
+        try
+        {
+            _logger.LogInformation("[DSRecord] Adding DS record for domain {Domain}", domainName);
+            AmazonRoute53DomainsClient client = await _domainsClientUtil.Get(cancellationToken).NoSync();
+            AssociateDelegationSignerToDomainResponse? response = await client.AssociateDelegationSignerToDomainAsync(request, cancellationToken).NoSync();
+            _logger.LogInformation("[DSRecord] Operation submitted. OperationId: {OperationId}", response.OperationId);
+
+            if (wait)
+                await WaitForOperation(response.OperationId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[DSRecord] Failed to add DS record for domain {Domain}: {Error}", domainName, ex.Message);
+            throw;
+        }
+    }
+
+    public async ValueTask RemoveDsRecord(string domainName, bool wait = false, CancellationToken cancellationToken = default)
+    {
+        if (domainName.IsNullOrWhiteSpace())
+            throw new ArgumentException("Domain name must be provided.", nameof(domainName));
+
+        var request = new DisassociateDelegationSignerFromDomainRequest
+        {
+            DomainName = domainName
+        };
+
+        try
+        {
+            _logger.LogInformation("[DSRecord] Removing DS record for domain {Domain}", domainName);
+            AmazonRoute53DomainsClient client = await _domainsClientUtil.Get(cancellationToken).NoSync();
+            DisassociateDelegationSignerFromDomainResponse? response = await client.DisassociateDelegationSignerFromDomainAsync(request, cancellationToken).NoSync();
+            _logger.LogInformation("[DSRecord] Operation submitted. OperationId: {OperationId}", response.OperationId);
+
+            if (wait)
+                await WaitForOperation(response.OperationId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[DSRecord] Failed to remove DS record for domain {Domain}: {Error}", domainName, ex.Message);
+            throw;
+        }
+    }
+
     private async ValueTask WaitForOperation(string operationId, CancellationToken cancellationToken)
     {
         if (operationId.IsNullOrWhiteSpace())
