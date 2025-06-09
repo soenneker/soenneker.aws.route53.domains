@@ -15,17 +15,17 @@ using Soenneker.Utils.Delay;
 
 namespace Soenneker.Aws.Route53.Domains;
 
-/// <inheritdoc cref="IRoute53DomainsUtil"/>
-public sealed class Route53DomainsUtil : IRoute53DomainsUtil
+/// <inheritdoc cref="IAwsRoute53DomainsUtil"/>
+public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 {
     private readonly IRoute53DomainsClientUtil _domainsClientUtil;
-    private readonly ILogger<Route53DomainsUtil> _logger;
+    private readonly ILogger<AwsRoute53DomainsUtil> _logger;
 
     private const int _initialPollIntervalMs = 1000; // Start with 1 second
     private const int _maxPollIntervalMs = 30000; // Max 30 seconds between polls
     private const int _maxRetries = 60; // Maximum number of retries (1 hour with max interval)
 
-    public Route53DomainsUtil(IRoute53DomainsClientUtil domainsClientUtil, ILogger<Route53DomainsUtil> logger)
+    public AwsRoute53DomainsUtil(IRoute53DomainsClientUtil domainsClientUtil, ILogger<AwsRoute53DomainsUtil> logger)
     {
         _domainsClientUtil = domainsClientUtil;
         _logger = logger;
@@ -299,19 +299,21 @@ public sealed class Route53DomainsUtil : IRoute53DomainsUtil
         }
     }
 
-    public async ValueTask AddDsRecord(string domainName, string dsRecord, bool wait = false, CancellationToken cancellationToken = default)
+    public async ValueTask AddDsRecord(string domainName, int flags, int algorithm, string publicKey, bool wait = false,  CancellationToken cancellationToken = default)
     {
         if (domainName.IsNullOrWhiteSpace())
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
-        if (dsRecord.IsNullOrWhiteSpace())
-            throw new ArgumentException("DS record must be provided.", nameof(dsRecord));
+        if (publicKey.IsNullOrWhiteSpace())
+            throw new ArgumentException("PublicKey must be provided.", nameof(publicKey));
 
         var request = new AssociateDelegationSignerToDomainRequest
         {
             DomainName = domainName,
             SigningAttributes = new DnssecSigningAttributes
             {
-                PublicKey = dsRecord
+                Flags = flags,
+                Algorithm = algorithm,
+                PublicKey = publicKey
             }
         };
 
@@ -346,7 +348,8 @@ public sealed class Route53DomainsUtil : IRoute53DomainsUtil
         {
             _logger.LogInformation("[DSRecord] Removing DS record for domain {Domain}", domainName);
             AmazonRoute53DomainsClient client = await _domainsClientUtil.Get(cancellationToken).NoSync();
-            DisassociateDelegationSignerFromDomainResponse? response = await client.DisassociateDelegationSignerFromDomainAsync(request, cancellationToken).NoSync();
+            DisassociateDelegationSignerFromDomainResponse? response =
+                await client.DisassociateDelegationSignerFromDomainAsync(request, cancellationToken).NoSync();
             _logger.LogInformation("[DSRecord] Operation submitted. OperationId: {OperationId}", response.OperationId);
 
             if (wait)

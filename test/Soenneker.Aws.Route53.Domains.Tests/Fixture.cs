@@ -26,6 +26,6 @@ public sealed class Fixture : UnitFixture
         IConfiguration config = TestUtil.BuildConfig();
         services.AddSingleton(config);
 
-        services.AddRoute53DomainsUtilAsScoped();
+        services.AddAwsRoute53DomainsUtilAsScoped();
     }
 }

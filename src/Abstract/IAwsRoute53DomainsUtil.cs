@@ -8,7 +8,7 @@ namespace Soenneker.Aws.Route53.Domains.Abstract;
 /// <summary>
 /// Defines high-level operations for AWS Route 53 Domains.
 /// </summary>
-public interface IRoute53DomainsUtil
+public interface IAwsRoute53DomainsUtil
 {
     /// <summary>
     /// Initiates a domain registration request.
@@ -111,15 +111,15 @@ public interface IRoute53DomainsUtil
     ValueTask<GetOperationDetailResponse> GetOperationDetail(string operationId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Adds a DS record to a domain.
+    /// Associates a DS (Delegation Signer) record with the given domain in Route 53 Domains.
     /// </summary>
-    /// <param name="domainName">The domain to add the DS record to.</param>
-    /// <param name="dsRecord">The DS record string from Cloudflare.</param>
-    /// <param name="wait">
-    /// If true, polls AWS until the operation completes or fails.
-    /// </param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    ValueTask AddDsRecord(string domainName, string dsRecord, bool wait = false, CancellationToken cancellationToken = default);
+    /// <param name="domainName">The domain to update (e.g. "example.com").</param>
+    /// <param name="flags">DNSSEC Flags (257 for KSK, 256 for ZSK).</param>
+    /// <param name="algorithm">DNSSEC algorithm number (e.g. 8 = RSA/SHA-256, 13 = ECDSAP256SHA256).</param>
+    /// <param name="publicKey">Base64-encoded DNSKEY public key bytes.</param>
+    /// <param name="wait">If true, poll until the operation completes.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    ValueTask AddDsRecord(string domainName, int flags, int algorithm, string publicKey, bool wait = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes a DS record from a domain.
