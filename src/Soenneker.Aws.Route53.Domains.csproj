@@ -42,7 +42,7 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Aws.Route53.DomainsClientUtil" Version="4.0.131" />
-        <PackageReference Include="Soenneker.Extensions.Task" Version="4.0.108" />
+        <PackageReference Include="Soenneker.Extensions.Task" Version="4.0.109" />
         <PackageReference Include="Soenneker.Utils.Delay" Version="4.0.42" />
     </ItemGroup>
 </Project>
