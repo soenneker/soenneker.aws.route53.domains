@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Route53Domains;
@@ -79,10 +78,21 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
         if (nameservers == null || nameservers.Count == 0)
             throw new ArgumentException("At least one nameserver must be provided.", nameof(nameservers));
 
+        var parsedNameservers = new List<Nameserver>(nameservers.Count);
+
+        for (var i = 0; i < nameservers.Count; i++)
+        {
+            string ns = nameservers[i];
+            if (ns.IsNullOrWhiteSpace())
+                continue;
+
+            parsedNameservers.Add(new Nameserver { Name = ns });
+        }
+
         var request = new UpdateDomainNameserversRequest
         {
             DomainName = domainName,
-            Nameservers = nameservers.Where(ns => !ns.IsNullOrWhiteSpace()).Select(ns => new Nameserver {Name = ns}).ToList()
+            Nameservers = parsedNameservers
         };
 
         try
