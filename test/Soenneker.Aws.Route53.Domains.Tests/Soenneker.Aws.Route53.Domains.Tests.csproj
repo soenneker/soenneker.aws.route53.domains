@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Aws.Route53.Domains.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Aws.Route53.Domains\Soenneker.Aws.Route53.Domains.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -4,10 +4,11 @@
   </Folder>
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/build-and-test.yml" />
+    <File Path=".github/workflows/codeql.yml" />
     <File Path=".github/workflows/publish-package.yml" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Soenneker.Aws.Route53.Domains.csproj" />
+    <Project Path="src/Soenneker.Aws.Route53.Domains/Soenneker.Aws.Route53.Domains.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Soenneker.Aws.Route53.Domains.Tests/Soenneker.Aws.Route53.Domains.Tests.csproj" />
