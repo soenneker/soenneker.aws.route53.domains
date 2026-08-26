@@ -44,8 +44,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Aws.Route53.DomainsClientUtil" Version="4.0.335" />
+        <PackageReference Include="Soenneker.Aws.Route53.DomainsClientUtil" Version="4.0.336" />
         <PackageReference Include="Soenneker.Extensions.Task" Version="4.0.125" />
-        <PackageReference Include="Soenneker.Utils.Delay" Version="4.0.78" />
+        <PackageReference Include="Soenneker.Utils.Delay" Version="4.0.79" />
     </ItemGroup>
 </Project>
