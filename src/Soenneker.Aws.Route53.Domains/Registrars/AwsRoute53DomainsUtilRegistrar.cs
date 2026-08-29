@@ -13,6 +13,8 @@ public static class AwsRoute53DomainsUtilRegistrar
     /// <summary>
     /// Adds <see cref="IAwsRoute53DomainsUtil"/> as a singleton service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddAwsRoute53DomainsUtilAsSingleton(this IServiceCollection services)
     {
         services.AddRoute53DomainsClientUtilAsSingleton().TryAddSingleton<IAwsRoute53DomainsUtil, AwsRoute53DomainsUtil>();
@@ -23,6 +25,8 @@ public static class AwsRoute53DomainsUtilRegistrar
     /// <summary>
     /// Adds <see cref="IAwsRoute53DomainsUtil"/> as a scoped service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddAwsRoute53DomainsUtilAsScoped(this IServiceCollection services)
     {
         services.AddRoute53DomainsClientUtilAsSingleton().TryAddScoped<IAwsRoute53DomainsUtil, AwsRoute53DomainsUtil>();

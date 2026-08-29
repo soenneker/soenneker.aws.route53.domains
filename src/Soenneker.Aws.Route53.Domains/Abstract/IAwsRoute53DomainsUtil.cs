@@ -13,26 +13,22 @@ public interface IAwsRoute53DomainsUtil
     /// <summary>
     /// Initiates a domain registration request.
     /// </summary>
-    /// <param name="domainName">The fully qualified domain name to register.</param>
+    /// <param name="domainName">Domain whose registration or DNS settings should be changed.</param>
     /// <param name="durationInYears">The registration period (in years).</param>
     /// <param name="contact">Contact details for admin, registrant, and tech.</param>
-    /// <param name="wait">
-    /// If true, polls AWS until the registration operation completes or fails.
-    /// </param>
+    /// <param name="wait">If true, polls AWS until the registration operation completes or fails.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task that completes when callback registration is finished.</returns>
     ValueTask Register(string domainName, int durationInYears, ContactDetail contact, bool wait = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates the nameservers for an existing domain.
     /// </summary>
-    /// <param name="domainName">The domain whose nameservers will be updated.</param>
-    /// <param name="nameservers">
-    /// A list of hostnames (e.g. "ns-123.awsdns-45.org") to assign as nameservers.
-    /// </param>
-    /// <param name="wait">
-    /// If true, polls AWS until the update operation completes or fails.
-    /// </param>
+    /// <param name="domainName">Domain whose registration or DNS settings should be changed.</param>
+    /// <param name="nameservers">A list of hostnames (e.g. "ns-123.awsdns-45.org") to assign as nameservers.</param>
+    /// <param name="wait">If true, polls AWS until the update operation completes or fails.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task that completes when the nameservers update is complete.</returns>
     ValueTask UpdateNameservers(string domainName, List<string> nameservers, bool wait = false, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -40,6 +36,7 @@ public interface IAwsRoute53DomainsUtil
     /// </summary>
     /// <param name="domainName">The domain to disable auto-renew on.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task that completes when the disable auto renew operation is complete.</returns>
     ValueTask DisableAutoRenew(string domainName, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -47,6 +44,7 @@ public interface IAwsRoute53DomainsUtil
     /// </summary>
     /// <param name="domainName">The domain to enable auto-renew on.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task that completes when the enable auto renew operation is complete.</returns>
     ValueTask EnableAutoRenew(string domainName, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -63,14 +61,13 @@ public interface IAwsRoute53DomainsUtil
     /// <summary>
     /// Updates contact information (admin, registrant, tech) for a domain.
     /// </summary>
-    /// <param name="domainName">The domain to update contacts for.</param>
+    /// <param name="domainName">Domain whose registration or DNS settings should be changed.</param>
     /// <param name="adminContact">New admin contact detail.</param>
     /// <param name="registrantContact">New registrant contact detail.</param>
     /// <param name="techContact">New tech contact detail.</param>
-    /// <param name="wait">
-    /// If true, polls AWS until the contact update operation completes or fails.
-    /// </param>
+    /// <param name="wait">If true, polls AWS until the contact update operation completes or fails.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task that completes when the contact update is complete.</returns>
     ValueTask UpdateContact(string domainName, ContactDetail adminContact, ContactDetail registrantContact, ContactDetail techContact, bool wait = false,
         CancellationToken cancellationToken = default);
 
@@ -119,15 +116,15 @@ public interface IAwsRoute53DomainsUtil
     /// <param name="publicKey">Base64-encoded DNSKEY public key bytes.</param>
     /// <param name="wait">If true, poll until the operation completes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task that completes when the ds record addition is complete.</returns>
     ValueTask AddDsRecord(string domainName, int flags, int algorithm, string publicKey, bool wait = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes a DS record from a domain.
     /// </summary>
-    /// <param name="domainName">The domain to remove the DS record from.</param>
-    /// <param name="wait">
-    /// If true, polls AWS until the operation completes or fails.
-    /// </param>
+    /// <param name="domainName">Domain whose registration or DNS settings should be changed.</param>
+    /// <param name="wait">If true, polls AWS until the operation completes or fails.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task that completes when the ds record removal is complete.</returns>
     ValueTask RemoveDsRecord(string domainName, bool wait = false, CancellationToken cancellationToken = default);
 }
