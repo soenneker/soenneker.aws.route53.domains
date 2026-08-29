@@ -22,7 +22,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     private const int _initialPollIntervalMs = 1000; // Start with 1 second
     private const int _maxPollIntervalMs = 30000; // Max 30 seconds between polls
-    private const int _maxRetries = 60; // Maximum number of retries (1 hour with max interval)
+    private const int _maxRetries = 60; // Maximum number of poll attempts
 
     public AwsRoute53DomainsUtil(IRoute53DomainsClientUtil domainsClientUtil, ILogger<AwsRoute53DomainsUtil> logger)
     {
@@ -37,6 +37,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
         if (durationInYears < 1)
             throw new ArgumentException("Duration must be at least 1 year.", nameof(durationInYears));
+        ArgumentNullException.ThrowIfNull(contact);
 
         var request = new RegisterDomainRequest
         {
@@ -88,6 +89,9 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
             parsedNameservers.Add(new Nameserver { Name = ns });
         }
+
+        if (parsedNameservers.Count == 0)
+            throw new ArgumentException("At least one non-empty nameserver must be provided.", nameof(nameservers));
 
         var request = new UpdateDomainNameserversRequest
         {
@@ -185,6 +189,9 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
     {
         if (domainName.IsNullOrWhiteSpace())
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
+        ArgumentNullException.ThrowIfNull(adminContact);
+        ArgumentNullException.ThrowIfNull(registrantContact);
+        ArgumentNullException.ThrowIfNull(techContact);
 
         var request = new UpdateDomainContactRequest
         {

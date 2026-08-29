@@ -5,48 +5,89 @@
 
 # Soenneker.Aws.Route53.Domains
 
-Defines high-level operations for AWS Route 53 Domains.
+High-level AWS Route 53 Domains operations for registration, availability, contacts, nameservers, auto-renewal, and DNSSEC delegation-signer records.
 
-## Install
+## Installation
 
 ```bash
 dotnet add package Soenneker.Aws.Route53.Domains
 ```
 
-## Quick start
+## Configuration and registration
+
+```json
+{
+  "Aws": {
+    "AccessKey": "access-key-id",
+    "SecretKey": "secret-access-key"
+  }
+}
+```
 
 ```csharp
 using Soenneker.Aws.Route53.Domains.Registrars;
-using Microsoft.Extensions.DependencyInjection;
 
-var services = new ServiceCollection();
-var result = services.AddAwsRoute53DomainsUtilAsSingleton();
+builder.Services.AddAwsRoute53DomainsUtilAsSingleton();
 ```
 
-Adds `IAwsRoute53DomainsUtil` as a singleton service.
+The AWS identity needs Route 53 Domains permissions for every operation your application calls. Store credentials in a secret provider.
 
-## What you get
+## Check availability
 
-- `IAwsRoute53DomainsUtil` — Defines high-level operations for AWS Route 53 Domains.
-- `AwsRoute53DomainsUtilRegistrar` — A utility library for AWS Route53 domain related operations.
+```csharp
+using Soenneker.Aws.Route53.Domains.Abstract;
 
-## API at a glance
+public sealed class DomainService(IAwsRoute53DomainsUtil domains)
+{
+    public ValueTask<bool> IsAvailable(
+        string domainName,
+        CancellationToken cancellationToken) =>
+        domains.IsAvailable(domainName, cancellationToken);
+}
+```
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `IAwsRoute53DomainsUtil.Register(domainName, durationInYears, contact, wait, cancellationToken)` | Initiates a domain registration request. | A task that completes when callback registration is finished. |
-| `IAwsRoute53DomainsUtil.UpdateNameservers(domainName, nameservers, wait, cancellationToken)` | Updates the nameservers for an existing domain. | A task that completes when the nameservers update is complete. |
-| `IAwsRoute53DomainsUtil.Get(domainName, cancellationToken)` | Fetches detailed information about a domain. | A `GetDomainDetailResponse` containing admin, registrant, tech contacts, nameservers, expiration date, and more. |
-| `IAwsRoute53DomainsUtil.UpdateContact(domainName, adminContact, registrantContact, techContact, wait, cancellationToken)` | Updates contact information (admin, registrant, tech) for a domain. | A task that completes when the contact update is complete. |
-| `IAwsRoute53DomainsUtil.GetAll(cancellationToken)` | Lists all domains under the AWS account. | A list of `DomainSummary`, each containing domain name and creation date. |
-| `IAwsRoute53DomainsUtil.IsAvailable(domainName, cancellationToken)` | Checks if a domain is available for registration. | True if the domain can be registered; otherwise false. |
-| `IAwsRoute53DomainsUtil.ListOperations(cancellationToken)` | Lists all operations (registration, transfer, update) performed recently. | A list of `OperationSummary` with OperationId and status. |
-| `IAwsRoute53DomainsUtil.GetOperationDetail(operationId, cancellationToken)` | Retrieves the status and details of a specific operation. | A `GetOperationDetailResponse` including status, submission date, and message. |
-| `IAwsRoute53DomainsUtil.AddDsRecord(domainName, flags, algorithm, publicKey, wait, cancellationToken)` | Associates a DS (Delegation Signer) record with the given domain in Route 53 Domains. | A task that completes when the ds record addition is complete. |
-| `IAwsRoute53DomainsUtil.RemoveDsRecord(domainName, wait, cancellationToken)` | Removes a DS record from a domain. | A task that completes when the ds record removal is complete. |
-| `AwsRoute53DomainsUtilRegistrar.AddAwsRoute53DomainsUtilAsSingleton(services)` | Adds `IAwsRoute53DomainsUtil` as a singleton service. | The same service collection, so additional registrations can be chained. |
-| `AwsRoute53DomainsUtilRegistrar.AddAwsRoute53DomainsUtilAsScoped(services)` | Adds `IAwsRoute53DomainsUtil` as a scoped service. | The same service collection, so additional registrations can be chained. |
+`false` means AWS returned any status other than `AVAILABLE`; it does not distinguish unavailable, reserved, or unsupported TLD responses.
 
-## Practical notes
+## Register a domain
 
-- Cancellation stops pending work; it does not undo work that has already completed.
+```csharp
+using Amazon.Route53Domains.Model;
+
+var contact = new ContactDetail
+{
+    ContactType = ContactType.PERSON,
+    FirstName = "Ada",
+    LastName = "Lovelace",
+    Email = "domains@example.com",
+    PhoneNumber = "+1.2065550100",
+    AddressLine1 = "123 Example Street",
+    City = "Seattle",
+    State = "WA",
+    CountryCode = "US",
+    ZipCode = "98101"
+};
+
+await domains.Register(
+    "example.com",
+    durationInYears: 1,
+    contact,
+    wait: true,
+    cancellationToken);
+```
+
+Registration uses the same contact for admin, registrant, and technical roles and enables privacy protection for all three. Confirm that this matches the TLD's rules and your legal requirements before submitting the request.
+
+## Other operations
+
+- `Get()` and `GetAll()` return domain details and the complete paginated domain list.
+- `UpdateNameservers()` replaces the domain's nameserver set; blank entries are ignored and at least one non-blank value is required.
+- `UpdateContact()` submits separate admin, registrant, and technical contacts.
+- `EnableAutoRenew()` and `DisableAutoRenew()` change renewal behavior.
+- `ListOperations()` and `GetOperationDetail()` expose AWS operation state.
+- `AddDsRecord()` and `RemoveDsRecord()` manage the Route 53 Domains delegation-signer association.
+
+## Asynchronous AWS operations
+
+Mutating methods with a `wait` parameter default to `false`. In that mode, completion means AWS accepted the operation; the requested change may still fail later. With `wait: true`, the utility polls until AWS reports success or failure, cancellation is requested, or the polling limit is reached.
+
+Domain registration and configuration calls can incur charges or interrupt DNS. Cancellation stops local waiting but cannot cancel or roll back an operation already accepted by AWS.
