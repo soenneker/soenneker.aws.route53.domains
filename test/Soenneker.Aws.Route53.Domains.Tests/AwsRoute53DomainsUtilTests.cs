@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using AwesomeAssertions;
 using Soenneker.Aws.Route53.Domains.Abstract;
@@ -18,22 +19,24 @@ public sealed class AwsRoute53DomainsUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Rejects_nameserver_lists_without_a_value()
+    public async Task Rejects_nameserver_lists_without_a_value(CancellationToken cancellationToken)
     {
         Func<Task> act = async () => await _util.UpdateNameservers(
             "example.com",
-            new List<string> {" ", "\t"});
+            new List<string> {" ", "\t"},
+            cancellationToken: cancellationToken);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }
 
     [Test]
-    public async Task Rejects_null_registration_contact()
+    public async Task Rejects_null_registration_contact(CancellationToken cancellationToken)
     {
         Func<Task> act = async () => await _util.Register(
             "example.com",
             1,
-            null!);
+            null!,
+            cancellationToken: cancellationToken);
 
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
