@@ -19,7 +19,7 @@ public sealed class AwsRoute53DomainsUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Rejects_nameserver_lists_without_a_value(CancellationToken cancellationToken)
+    public async ValueTask Rejects_nameserver_lists_without_a_value(CancellationToken cancellationToken)
     {
         Func<Task> act = async () => await _util.UpdateNameservers(
             "example.com",
@@ -30,7 +30,7 @@ public sealed class AwsRoute53DomainsUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Rejects_null_registration_contact(CancellationToken cancellationToken)
+    public async ValueTask Rejects_null_registration_contact(CancellationToken cancellationToken)
     {
         Func<Task> act = async () => await _util.Register(
             "example.com",
