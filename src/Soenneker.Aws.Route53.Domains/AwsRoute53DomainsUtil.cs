@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +7,6 @@ using Amazon.Route53Domains.Model;
 using Microsoft.Extensions.Logging;
 using Soenneker.Aws.Route53.Domains.Abstract;
 using Soenneker.Aws.Route53.DomainsClientUtil.Abstract;
-using Soenneker.Extensions.String;
 using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Utils.Delay;
@@ -33,7 +32,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
     public async ValueTask Register(string domainName, int durationInYears, ContactDetail contact, bool wait = false,
         CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
         if (durationInYears < 1)
             throw new ArgumentException("Duration must be at least 1 year.", nameof(durationInYears));
@@ -74,7 +73,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask UpdateNameservers(string domainName, List<string> nameservers, bool wait = false, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
         if (nameservers == null || nameservers.Count == 0)
             throw new ArgumentException("At least one nameserver must be provided.", nameof(nameservers));
@@ -84,7 +83,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
         for (var i = 0; i < nameservers.Count; i++)
         {
             string ns = nameservers[i];
-            if (ns.IsNullOrWhiteSpace())
+            if (string.IsNullOrWhiteSpace(ns))
                 continue;
 
             parsedNameservers.Add(new Nameserver { Name = ns });
@@ -118,7 +117,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask DisableAutoRenew(string domainName, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
 
         var request = new DisableDomainAutoRenewRequest
@@ -141,7 +140,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask EnableAutoRenew(string domainName, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
 
         var request = new EnableDomainAutoRenewRequest
@@ -164,7 +163,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask<GetDomainDetailResponse> Get(string domainName, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
 
         try
@@ -187,7 +186,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
     public async ValueTask UpdateContact(string domainName, ContactDetail adminContact, ContactDetail registrantContact, ContactDetail techContact,
         bool wait = false, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
         ArgumentNullException.ThrowIfNull(adminContact);
         ArgumentNullException.ThrowIfNull(registrantContact);
@@ -247,7 +246,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask<bool> IsAvailable(string domainName, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
 
         try
@@ -296,7 +295,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask<GetOperationDetailResponse> GetOperationDetail(string operationId, CancellationToken cancellationToken = default)
     {
-        if (operationId.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(operationId))
             throw new ArgumentException("OperationId must be provided.", nameof(operationId));
 
         try
@@ -318,9 +317,9 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask AddDsRecord(string domainName, int flags, int algorithm, string publicKey, bool wait = false,  CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
-        if (publicKey.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(publicKey))
             throw new ArgumentException("PublicKey must be provided.", nameof(publicKey));
 
         var request = new AssociateDelegationSignerToDomainRequest
@@ -353,7 +352,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     public async ValueTask RemoveDsRecord(string domainName, bool wait = false, CancellationToken cancellationToken = default)
     {
-        if (domainName.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(domainName))
             throw new ArgumentException("Domain name must be provided.", nameof(domainName));
 
         var request = new DisassociateDelegationSignerFromDomainRequest
@@ -381,7 +380,7 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
     private async ValueTask WaitForOperation(string operationId, CancellationToken cancellationToken)
     {
-        if (operationId.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(operationId))
             throw new ArgumentException("OperationId must be provided.", nameof(operationId));
 
         _logger.LogDebug("[Wait] Beginning to poll for operation {OperationId}", operationId);
