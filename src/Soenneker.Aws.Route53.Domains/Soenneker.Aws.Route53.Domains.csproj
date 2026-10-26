@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
         <IsAotCompatible>true</IsAotCompatible>
         <Nullable>enable</Nullable>
         <Platforms>AnyCPU</Platforms>
@@ -9,7 +9,7 @@
 
     <PropertyGroup>
         <Description>A utility library for AWS Route53 domain related operations</Description>
-        <Version Condition="'$(BUILD_VERSION)' == ''">4.0.0</Version>
+        <Version Condition="'$(BUILD_VERSION)' == ''">11.0.0</Version>
         <Version Condition="'$(BUILD_VERSION)' != ''">$(BUILD_VERSION)</Version>
         <AssemblyName>Soenneker.Aws.Route53.Domains</AssemblyName>
         <PackageId>Soenneker.Aws.Route53.Domains</PackageId>
@@ -47,6 +47,6 @@
     <ItemGroup>
         <PackageReference Include="Soenneker.Aws.Route53.DomainsClientUtil" Version="4.0.408" />
         <PackageReference Include="Soenneker.Extensions.Task" Version="4.0.140" />
-        <PackageReference Include="Soenneker.Utils.Delay" Version="4.0.104" />
+        <PackageReference Include="Soenneker.Utils.Delay" Version="4.0.105" />
     </ItemGroup>
 </Project>
