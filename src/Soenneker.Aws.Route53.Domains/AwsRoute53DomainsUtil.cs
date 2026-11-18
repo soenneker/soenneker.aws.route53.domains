@@ -59,7 +59,8 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
             if (wait)
             {
-                _logger.LogDebug("[Register] Waiting for operation completion for domain {Domain}", domainName);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug("[Register] Waiting for operation completion for domain {Domain}", domainName);
                 await WaitForOperation(response.OperationId, cancellationToken);
                 _logger.LogInformation("[Register] Domain {Domain} registration completed successfully", domainName);
             }
@@ -383,7 +384,8 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
         if (string.IsNullOrWhiteSpace(operationId))
             throw new ArgumentException("OperationId must be provided.", nameof(operationId));
 
-        _logger.LogDebug("[Wait] Beginning to poll for operation {OperationId}", operationId);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("[Wait] Beginning to poll for operation {OperationId}", operationId);
 
         var retryCount = 0;
         int currentPollInterval = _initialPollIntervalMs;
@@ -410,7 +412,8 @@ public sealed class AwsRoute53DomainsUtil : IAwsRoute53DomainsUtil
 
             if (status == OperationStatus.SUCCESSFUL)
             {
-                _logger.LogInformation("[Wait] Operation {OperationId} completed successfully", operationId);
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("[Wait] Operation {OperationId} completed successfully", operationId);
                 return;
             }
 
